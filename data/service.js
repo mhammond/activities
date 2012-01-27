@@ -1,5 +1,13 @@
 /* -*- Mode: JavaScript; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* vim: set ts=2 et sw=2 tw=80: */
+
+console = {
+   log: function() {
+      var args = Array.prototype.slice.call(arguments);
+      dump(args.join(" ") + "\n");
+   }
+}
+
 var gServiceList;
 
 function S4() {
@@ -92,15 +100,16 @@ var addServicesService = new Service({
 
 function confirm() {
   var port = window.navigator.mozActivities.mediation.port;
-  var selected = $("#services").tabs('option', 'selected'); // => 0
-  var service = gServiceList[selected].call("confirm", {}, function(status) {
+  var selected = $(".active").find("a").attr("index");
+  var service = gServiceList[+selected];
+  service.call("confirm", {}, function(status) {
     var messageData = {
-      app: iframe.contentWindow.location.href,
+      app: service._getServiceFrame().location.href,
       result: "ok"
     };
-    port.emit("result", messageData);
+    port.emit("owa.success", messageData);
   }, function(err) {
-    port.emit("error", err);
+    port.emit("owa.failure", err);
   });
 }
 
@@ -122,9 +131,13 @@ function configureServices(activity, services) {
       console.log("service", service.url, "is ready - initializing it");
       service.call("init", activity.data, function() {
         console.log("service init complete");
-      })
+      },
+      function(errob) {
+         console.log("service init failed", JSON.stringify(errob));
+      });
     });
   }
+   navigator.mozActivities.mediation.port.emit("owa.mediation.sizeToContent");
 }
 
 window.navigator.mozActivities.mediation.ready(configureServices, startActivity);

@@ -30,7 +30,7 @@
     <ul id="services-tabs" class="tabs">
       {{each( i, svc ) services}}
       <li class="serviceTab" data-for="svc-tab-${i}">
-        <a href="#svc-tab-${i}">
+        <a href="#svc-tab-${i}" index="${i}">
           <img src="${svc.getIconForSize(48)}" class="serviceIcon"/>
           <div class="serviceTitle">${svc.app.manifest.name}</div>
         </a>
